@@ -24,10 +24,11 @@ public class Teste{
 			teste2.adicione(123);
 			teste2.adicione(4);
 			teste2.mergeSort();
+			System.out.println("Teste == Teste2 ? " + teste.equals(teste2));
+
+			teste2.adicione(129);
 			System.out.println("Teste hash: " + teste.hashCode());
 			System.out.println("Teste2 hash: " + teste.hashCode());
-
-			System.out.println("Teste == Teste2 ? " + teste.equals(teste2));
 
 			Vetor<Integer> teste3 = (Vetor<Integer>)teste.clone();
 			System.out.println("Teste3 é o mesmo q Teste2? " + (teste3 == teste2));

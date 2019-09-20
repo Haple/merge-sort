@@ -51,6 +51,7 @@ public class Vetor <X extends Comparable<X>>{
 	public void adicione(X x) throws Exception{
 		if(x==null)
 			throw new Exception("Valor ausente");
+		System.out.println("Capacidade: " + this.vetor.length);
 		if(this.qtd==this.vetor.length)
 			throw new Exception("Nao cabe");
 		if(x instanceof Cloneable)
@@ -70,8 +71,8 @@ public class Vetor <X extends Comparable<X>>{
 			throw new Exception("Item inválido");
 		if(this.qtd==0)
 			throw new Exception("Vetor vazio");
-		int i = 0;
-		for(; i<this.qtd; i++){
+		int i;
+		for(i=0; i<this.qtd; i++){
 			if(this.vetor[i].equals(x)){
 				this.remova(i);
 			}
@@ -97,7 +98,9 @@ public class Vetor <X extends Comparable<X>>{
 	public void mergeSort() throws Exception{
 		if(this.qtd<=1)
 			throw new Exception("Nada para ordenar");
-		this.vetor=this.sort(this.vetor, 0,this.qtd-1);
+		Object[] ordenado=this.sort(this.vetor, 0,this.qtd-1);
+		for(int i=0; i<this.qtd; i++)
+			this.vetor[i]=ordenado[i];
 	}
 
 	private  Object[] sort(Object[] vetor, int inicio, int fim){
