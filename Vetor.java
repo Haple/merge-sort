@@ -1,6 +1,7 @@
 import java.util.Arrays;
 import java.lang.reflect.*;
-
+// Fazer uma terceira versão usando paralelismo
+// Runtime.getRuntime().avaibleProcessors()
 public class Vetor <X extends Comparable<X>>{
 
 	private Object[] vetor;
@@ -51,7 +52,6 @@ public class Vetor <X extends Comparable<X>>{
 	public void adicione(X x) throws Exception{
 		if(x==null)
 			throw new Exception("Valor ausente");
-		System.out.println("Capacidade: " + this.vetor.length);
 		if(this.qtd==this.vetor.length)
 			throw new Exception("Nao cabe");
 		if(x instanceof Cloneable)
@@ -98,42 +98,38 @@ public class Vetor <X extends Comparable<X>>{
 	public void mergeSort() throws Exception{
 		if(this.qtd<=1)
 			throw new Exception("Nada para ordenar");
-		Object[] ordenado=this.sort(this.vetor, 0,this.qtd-1);
-		for(int i=0; i<this.qtd; i++)
-			this.vetor[i]=ordenado[i];
+		this.sort(0,this.qtd-1);
 	}
-
-	private  Object[] sort(Object[] vetor, int inicio, int fim){
-		// condicao de parada
-		if(inicio == fim){
-			Object[] retorno = new Object[1];
-			retorno[0] = vetor[inicio];
-			return retorno;
-		}
+	// Usar paralelismo entre as duas chamadas das metades
+	private  void sort(int inicio, int fim){
 		int tamanho = fim - inicio + 1;
+		if(tamanho==1) return;
 		int metade = inicio + tamanho/2;
-		return merge(sort(vetor,inicio, metade-1),
-			sort(vetor,metade,fim));
+		sort(inicio, metade-1);
+		sort(metade, fim);
+		merge(inicio,metade-1,metade,fim);
 	}
 
-	private Object[] merge(Object[] v1, Object[] v2){
-                Object[] v3 = new Object[v1.length + v2.length];
-		int i=0; int j=0; int k=0;
-		while(i < v1.length && j < v2.length){
-			if(((X)v1[i]).compareTo((X)v2[j]) > 0)
-				v3[k++] = v2[j++];
-			else if (((X)v1[i]).compareTo((X)v2[j]) < 0)
-				v3[k++] = v1[i++];
+	private void merge(int ini1, int fim1, int ini2, int fim2){
+		int qtd1=fim1-ini1+1, qtd2=fim2-ini2+1, qtd=qtd1+qtd2;
+                Object[] vet = new Object[qtd];
+		int i=0; int j=ini1; int k=ini2;
+		while(j<=fim1 && k<=fim2){
+			if(((X)this.vetor[j]).compareTo((X)this.vetor[k]) > 0)
+				vet[i++] = this.vetor[k++];
+			else if (((X)this.vetor[j]).compareTo((X)this.vetor[k]) < 0)
+				vet[i++] = this.vetor[j++];
 			else {
-	 			v3[k++] = v1[i++];
-				v3[k++] = v2[j++];
+	 			vet[i++] = this.vetor[j++];
+				vet[i++] = this.vetor[k++];
 			}
 		}
-		while(i < v1.length)
-			v3[k++] = v1[i++];
-		while(j < v2.length)
-			v3[k++] = v2[j++];
-		return v3;
+		while(j<=fim1)
+			vet[i++]=this.vetor[j++];
+		while(k<=fim2)
+			vet[i++]=this.vetor[k++];
+		for(i=0;i<qtd;i++)
+			this.vetor[ini1+i]=vet[i];
 	}
 
 	public int hashCode(){
