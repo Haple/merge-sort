@@ -1,40 +1,50 @@
 import java.util.Arrays;
+import java.util.Random;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Teste{
 
+	private static final int TAMANHO_VETOR = 50000000;
+
 	public static void main(String[] args){
+		if(args.length > 0 && args[0].toLowerCase().equals("p"))
+			testeVetorComParalelismo();
+		else
+			testeVetorSemParalelismo();
+	}
+
+	private static void testeVetorComParalelismo(){
 		try{
-			Vetor<Integer> teste = new Vetor<Integer>(10);
-			teste.adicione(231);
-			teste.adicione(378);
-			teste.adicione(34);
-			teste.adicione(2);
-			teste.adicione(123);
-			System.out.println("Vetor desordenado: " + teste);
-			teste.mergeSort();
-			System.out.println("Vetor ordenado: " + teste);
-
-			teste.remova(4);
-			System.out.println("Posicao 4 removida: " + teste);
-			teste.remova(new Integer(34));
-			System.out.println("Item 34 removido: " + teste);
-
-			Vetor<Integer> teste2 = new Vetor<Integer>(9);
-			teste2.adicione(231);
-			teste2.adicione(123);
-			teste2.adicione(4);
-			teste2.mergeSort();
-			System.out.println("Teste == Teste2 ? " + teste.equals(teste2));
-
-			teste2.adicione(129);
-			System.out.println("Teste hash: " + teste.hashCode());
-			System.out.println("Teste2 hash: " + teste.hashCode());
-
-			Vetor<Integer> teste3 = (Vetor<Integer>)teste.clone();
-			System.out.println("Teste3 é o mesmo q Teste2? " + (teste3 == teste2));
+			System.out.println("Vetor com Threads");
+			Vetor<Integer> vet = new Vetor<Integer>(TAMANHO_VETOR);
+			for(int i=0;i<TAMANHO_VETOR;i++){
+				vet.adicione(new Random().nextInt(1000));
+			}
+			System.out.println("Vetor criado com " + TAMANHO_VETOR + " posições");
+			LocalDateTime inicio = LocalDateTime.now();
+			vet.mergeSort();
+			LocalDateTime fim = LocalDateTime.now();
+			System.out.println("Milisegundos: " + ChronoUnit.MILLIS.between(inicio,fim));
 		} catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
+	private static void testeVetorSemParalelismo(){
+		try{
+			System.out.println("Vetor sem Threads");
+			Vetor0<Integer> vet = new Vetor0<Integer>(TAMANHO_VETOR);
+			for(int i=0;i<TAMANHO_VETOR;i++){
+				vet.adicione(new Random().nextInt(1000));
+			}
+			System.out.println("Vetor criado com " + TAMANHO_VETOR + " posições");
+			LocalDateTime inicio = LocalDateTime.now();
+			vet.mergeSort();
+			LocalDateTime fim = LocalDateTime.now();
+			System.out.println("Milisegundos: " + ChronoUnit.MILLIS.between(inicio,fim));
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 }

@@ -2,26 +2,24 @@ import java.util.Arrays;
 import java.lang.reflect.*;
 // Fazer uma terceira versão usando paralelismo
 // Runtime.getRuntime().avaibleProcessors()
-public class Vetor <X extends Comparable<X>>{
+public class Vetor0 <X extends Comparable<X>>{
 
-	private int numProcessadores;
 	private Object[] vetor;
 	private int qtd=0;
 
 	/**
 	 * Constrói um novo vetor com uma capacidade fixa.
 	 */
-	public Vetor(int capacidade) throws Exception{
+	public Vetor0(int capacidade) throws Exception{
 		if(capacidade<=0)
 			throw new Exception("Capacidade invalida");
 		this.vetor=new Object[capacidade];
-		this.numProcessadores=Runtime.getRuntime().availableProcessors();
 	}
 
 	/**
 	 * Construtor de cópia.
 	 */
-	public Vetor(Vetor modelo) throws Exception{
+	public Vetor0(Vetor0 modelo) throws Exception{
 		if(modelo==null)
 			throw new Exception("Vetor inválido");
 		this.qtd = modelo.qtd;
@@ -31,9 +29,9 @@ public class Vetor <X extends Comparable<X>>{
 	}
 
 	public Object clone(){
-		Vetor clone = null;
+		Vetor0 clone = null;
 		try{
-			clone = new Vetor(this);
+			clone = new Vetor0(this);
 		}catch(Exception e){}
 		return clone;
 	}
@@ -101,24 +99,8 @@ public class Vetor <X extends Comparable<X>>{
 		if(this.qtd<=1)
 			throw new Exception("Nada para ordenar");
 		this.sort(0,this.qtd-1);
-		int tamParte = this.qtd/this.numProcessadores;
-		int posAtual=0;
-		if(tamParte > 0){
-			for(int i=0; i<this.numProcessadores; i++,posAtual+=tamParte){
-				this.sortParalelo(posAtual,posAtual+tamParte-1);
-			}
-		}
-		if(posAtual<this.qtd){
-			this.sortParalelo(posAtual,this.qtd-1);
-		}
 	}
-
-	private void sortParalelo(final int inicio, final int fim){
-		new Thread(()->{
-			this.sort(inicio,fim);
-		}).start();
-	}
-
+	// Usar paralelismo entre as duas chamadas das metades
 	private  void sort(int inicio, int fim){
 		int tamanho = fim - inicio + 1;
 		if(tamanho==1) return;
@@ -171,7 +153,7 @@ public class Vetor <X extends Comparable<X>>{
 			return true;
 		if(this.getClass() != obj.getClass())
 			return false;
-		Vetor outro = (Vetor)obj;
+		Vetor0 outro = (Vetor0)obj;
 		if(this.qtd != outro.qtd)
 			return false;
 		for(int i=0; i<this.qtd; i++)
@@ -190,3 +172,4 @@ public class Vetor <X extends Comparable<X>>{
 		return retorno;
 	}
 }
+
