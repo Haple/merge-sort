@@ -3,9 +3,11 @@ import java.lang.reflect.*;
 
 public class Vetor <X extends Comparable<X>>{
 
-	private Thread[] threads;
+	private Thread[] threadsSort;
+	private Thread[] threadsMerge;
 	private int numProcessadores;
-	private int qtdThread=0;
+	private int qtdThreadSort=0;
+	private int qtdThreadMerge=0;
 
 	private Object[] vetor;
 	private int qtd=0;
@@ -18,7 +20,8 @@ public class Vetor <X extends Comparable<X>>{
 			throw new Exception("Capacidade invalida");
 		this.vetor=new Object[capacidade];
 		this.numProcessadores=Runtime.getRuntime().availableProcessors()-1;
-		this.threads=new Thread[this.numProcessadores];
+		this.threadsSort=new Thread[this.numProcessadores];
+		this.threadsMerge=new Thread[this.numProcessadores];
 	}
 
 	/**
@@ -101,7 +104,8 @@ public class Vetor <X extends Comparable<X>>{
 	 * Ordena o vetor usando o algoritmo Merge Sort.
 	 */
 	public void mergeSort() throws Exception{
-		this.qtdThread=0;
+		this.qtdThreadSort=0;
+		this.qtdThreadMerge=0;
 		if(this.qtd<=1)
 			throw new Exception("Nada para ordenar");
 		int tamParte = this.qtd/this.numProcessadores;
@@ -113,29 +117,38 @@ public class Vetor <X extends Comparable<X>>{
 		}
 		sortParalelo(posAtual,this.qtd-1);
 		System.out.println("Aguardando as threads terminarem...");
-		esperaFimDasThreads();
+		esperaFimDasThreads(this.threadsSort);
 		System.out.println("Terminaram. Começando merge dos resultados");
 		posAtual=0;
 		for(int i=0; i<this.numProcessadores-1;i++){
-			merge(0,posAtual+tamParte-1,posAtual+tamParte,posAtual+(tamParte*2)-1);
+			mergeParalelo(0,posAtual+tamParte-1,posAtual+tamParte,posAtual+(tamParte*2)-1);
 			posAtual+=tamParte;
 		}
 		posAtual+=tamParte;
-		merge(0,posAtual-1, posAtual,this.qtd-1);
+		mergeParalelo(0,posAtual-1, posAtual,this.qtd-1);
+		esperaFimDasThreads(this.threadsMerge);
 	}
 
-	private void esperaFimDasThreads() throws Exception{
-		for(int i=0; i<this.numProcessadores; i++)
-			this.threads[i].join();
+	private void esperaFimDasThreads(Thread[] threads) throws Exception{
+		for(int i=0; i<threads.length; i++)
+			threads[i].join();
 	}
 
 	private void sortParalelo(final int inicio, final int fim){
 		Thread t = new Thread(()->{
 			this.sort(inicio,fim);
 		});
-		this.threads[this.qtdThread++] = t;
+		this.threadsSort[this.qtdThreadSort++] = t;
 		t.start();
-		System.out.println("Iniciada thread " + (this.qtdThread));
+		System.out.println("Iniciada thread " + (this.qtdThreadSort));
+	}
+
+	private void mergeParalelo(final int ini1, final int fim1, final int ini2, final int fim2){
+		Thread t = new Thread(()->{
+			this.merge(ini1,fim1,ini2,fim2);
+		});
+		this.threadsMerge[this.qtdThreadMerge++] = t;
+		t.start();
 	}
 
 	private  void sort(int inicio, int fim){
