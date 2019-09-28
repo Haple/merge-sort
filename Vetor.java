@@ -1,10 +1,12 @@
 import java.util.Arrays;
 import java.lang.reflect.*;
-// Fazer uma terceira versão usando paralelismo
-// Runtime.getRuntime().avaibleProcessors()
+
 public class Vetor <X extends Comparable<X>>{
 
+	private Thread[] threads;
 	private int numProcessadores;
+	private int qtdThread=0;
+
 	private Object[] vetor;
 	private int qtd=0;
 
@@ -15,7 +17,8 @@ public class Vetor <X extends Comparable<X>>{
 		if(capacidade<=0)
 			throw new Exception("Capacidade invalida");
 		this.vetor=new Object[capacidade];
-		this.numProcessadores=Runtime.getRuntime().availableProcessors();
+		this.numProcessadores=Runtime.getRuntime().availableProcessors()-1;
+		this.threads=new Thread[this.numProcessadores];
 	}
 
 	/**
@@ -98,25 +101,41 @@ public class Vetor <X extends Comparable<X>>{
 	 * Ordena o vetor usando o algoritmo Merge Sort.
 	 */
 	public void mergeSort() throws Exception{
+		this.qtdThread=0;
 		if(this.qtd<=1)
 			throw new Exception("Nada para ordenar");
-		this.sort(0,this.qtd-1);
 		int tamParte = this.qtd/this.numProcessadores;
 		int posAtual=0;
 		if(tamParte > 0){
-			for(int i=0; i<this.numProcessadores; i++,posAtual+=tamParte){
-				this.sortParalelo(posAtual,posAtual+tamParte-1);
+			for(int i=0; i<this.numProcessadores-1; i++,posAtual+=tamParte){
+				sortParalelo(posAtual,posAtual+tamParte-1);
 			}
 		}
-		if(posAtual<this.qtd){
-			this.sortParalelo(posAtual,this.qtd-1);
+		sortParalelo(posAtual,this.qtd-1);
+		System.out.println("Aguardando as threads terminarem...");
+		esperaFimDasThreads();
+		System.out.println("Terminaram. Começando merge dos resultados");
+		posAtual=0;
+		for(int i=0; i<this.numProcessadores-1;i++){
+			merge(0,posAtual+tamParte-1,posAtual+tamParte,posAtual+(tamParte*2)-1);
+			posAtual+=tamParte;
 		}
+		posAtual+=tamParte;
+		merge(0,posAtual-1, posAtual,this.qtd-1);
+	}
+
+	private void esperaFimDasThreads() throws Exception{
+		for(int i=0; i<this.numProcessadores; i++)
+			this.threads[i].join();
 	}
 
 	private void sortParalelo(final int inicio, final int fim){
-		new Thread(()->{
+		Thread t = new Thread(()->{
 			this.sort(inicio,fim);
-		}).start();
+		});
+		this.threads[this.qtdThread++] = t;
+		t.start();
+		System.out.println("Iniciada thread " + (this.qtdThread));
 	}
 
 	private  void sort(int inicio, int fim){
